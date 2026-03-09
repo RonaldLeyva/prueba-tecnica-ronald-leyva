@@ -1,3 +1,4 @@
+using CleanArchitecture.PracticalTest.Application.Exceptions;
 using CleanArchitecture.PracticalTest.Domain.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
@@ -49,6 +50,17 @@ public static class ProblemDetailsFactory
             Status = StatusCodes.Status500InternalServerError,
             Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
             Detail = "An unexpected error occurred. Please try again later.",
+            Instance = context.Request.Path
+        };
+    }
+    public static ProblemDetails NotFound(NotFoundException ex, HttpContext context)
+    {
+        return new ProblemDetails
+        {
+            Title = "Resource Not Found",
+            Status = StatusCodes.Status404NotFound,
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+            Detail = ex.Message,
             Instance = context.Request.Path
         };
     }

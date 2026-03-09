@@ -2,6 +2,8 @@ using CleanArchitecture.PracticalTest.API.Configurations;
 using CleanArchitecture.PracticalTest.API.ErrorHandling;
 using CleanArchitecture.PracticalTest.API.Middlewares;
 using CleanArchitecture.PracticalTest.Application;
+using CleanArchitecture.PracticalTest.Application.Contracts.ContextApplication;
+using CleanArchitecture.PracticalTest.Application.Features.Queries;
 using CleanArchitecture.PracticalTest.Infrastructure;
 using CleanArchitecture.PracticalTest.Infrastructure.Data;
 using HealthChecks.UI.Client;
@@ -36,6 +38,9 @@ try
             tags: ["db", "postgresql"]
         );
 
+    builder.Services.AddScoped<IContextDb, ContextDb>();
+    builder.Services.AddSingleton<ILocalizer, Localizer>();
+
     // Configura el host para usar Serilog como el proveedor de registro de eventos
     builder.Host.UseSerilog();
 
@@ -57,6 +62,8 @@ try
     // Agrega un servicio para acceder al contexto HTTP actual en cualquier parte de la aplicación
     builder.Services.AddHttpContextAccessor();
 
+    builder.Services.AddTransient<IExceptionMapper, DefaultExceptionMapper>();
+
     // Registra el middleware global para manejar excepciones no controladas en la aplicación
     builder.Services.AddTransient<IExceptionMapper, DefaultExceptionMapper>();
     // builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
@@ -68,6 +75,11 @@ try
 
     // Registra los servicios de la capa de aplicación, como casos de uso, validaciones y lógica de negocio
     builder.Services.AddApplicationServices();
+
+    builder.Services.AddMediatR(cfg =>
+    {
+        cfg.RegisterServicesFromAssembly(typeof(ObtenerPaqueteQuery).Assembly);
+    });
     #endregion
 
     #region Application Pipeline
